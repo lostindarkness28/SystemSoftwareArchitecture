@@ -1,48 +1,45 @@
-#include <math.h>
+#include "erf_module.h"
 #include <stdio.h>
 
 int main() {
-    int choice;
+    int choice,df;
     double z;
     printf("Enter Z-score: ");
     if (scanf("%lf", &z) != 1) {
         fprintf(stderr, "Invalid input!\n");
         return 1;
     }
-    double result = erf(z * sqrt(1/2.));
-    if(isnan(result)){
+    printf("Enter degrees of freedom (df): ");
+    if (scanf("%d", &df) != 1||df<=0) {
+        fprintf(stderr, "Invalid input!\n");
+        return 1;
+    }
+    double res_n = calculate_normal(z);
+    double res_s = calculate_student(z, df);
+
+    if(isnan(res_n)||isnan(res_s)){
         printf("Помилка: неможливо обчислити значення інтеграла!\n");
         return 1;
     }
     else{
         printf("The integral of a Normal (0,1) distribution "
-        "between -Z and Z i’s: %g\n",result);
+        "between -Z and Z i’s: %g\n",res_n);
+	printf("The integral of a Student distribution: %g (df=%d)\n", res_s, df);
     }
-    double ci90 = 1.64485;
-    double ci95 = 1.95996;
-    double ci99 = 2.57583;
+    printf("\nResults for input %g:\n", z);
+    printf("Normal Distribution:  %g\n", res_n);
+    printf("Student Distribution: %g (df=%d)\n", res_s, df);
 
-    printf("Choose confidence integral:\n");
-    printf("1 - 90%% Confidence Interval\n");
-    printf("2 - 95%% Confidence Interval\n");
-    printf("3 - 99%% Confidence Interval\n");;
+    printf("\nCheck standard confidence intervals (Normal):\n");
+    printf("1 - 90%%\n");
+    printf("2 - 95%%\n");
+    printf("3 - 99%%\n");
     printf("Your choice: ");
-
-    if (scanf("%d", &choice) != 1) {
-        printf("Invalid input!\n");
-        return 1;
-    }
-    if(choice == 1){
-        printf("90%% CI: %g\n", erf(ci90 * sqrt(1/2.)));
-    }
-    if(choice == 2){
-        printf("50%% CI: %g\n", erf(ci95 * sqrt(1/2.)));
-    }
-    if(choice == 3){
-        printf("99%% CI: %g\n", erf(ci99 * sqrt(1/2.)));
-    }
-    else{
-	printf("Incorrect choice \n");
+    if (scanf("%d", &choice) == 1) {
+        if (choice == 1) printf("90%% Result: %g\n", calculate_normal(CI90));
+        else if (choice == 2) printf("95%% Result: %g\n", calculate_normal(CI95));
+        else if (choice == 3) printf("99%% Result: %g\n", calculate_normal(CI99));
+        else printf("Incorrect choice\n");
     }
     return 0;
 }
