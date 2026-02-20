@@ -299,3 +299,211 @@ add_executable(my_program main.c input.c output.c)
 target_link_libraries(my_program process1 process)
 ```
 # Завдання 4
+У вас є програма на C, яка складається з кількох модулів (main.c, module1.c, module2.c) та використовує бібліотеку pthread.
+#### 1)Напишіть команду компіляції з підтримкою багатопоточності (-pthread).
+main.c:
+```
+#include <stdio.h>
+#include <pthread.h>
+
+void print1();
+void print2();
+
+void* thread_function(void* arg) {
+    printf("Потік: Виконання завдання успішно розпочато.\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thread;
+
+    print1();
+    print2();
+
+    pthread_create(&thread, NULL, thread_function, NULL);
+
+    pthread_join(thread, NULL);
+
+    printf("Головна програма: Усі операції завершено.\n");
+
+    return 0;
+}
+```
+Для компіляції використовується команда 
+```
+gcc main.c module1.c module2.c -pthread -o my_program
+```
+ де прапорець -pthread дозволяє програмі працювати з потоками; у самому коді ми використовуємо pthread_create, щоб запустити функцію паралельно з основною програмою, та pthread_join, щоб головна частина почекала завершення цієї роботи перед виходом.
+
+#### 2)Змініть код так, щоб він використовував OpenMP (#pragma omp parallel).
+main.c:
+```
+#include <stdio.h>
+#include <omp.h>
+
+void print1();
+void print2();
+
+int main() {
+    print1();
+    print2();
+
+    #pragma omp parallel
+    {
+        printf("Потік OpenMP: виконання паралельної секції.\n");
+    }
+
+    printf("Головна програма: Усі операції завершено.\n");
+
+    return 0;
+}
+```
+Компіляція
+```
+gcc main.c module1.c module2.c -fopenmp -o my_omp_program
+```
+прапорець -fopenmp вмикає підтримку багатопоточності; у коді ми використовуємо директиву #pragma omp parallel, яка автоматично розпаралелює блок коду.
+
+#### 3)Використовуйте valgrind або gprof для аналізу продуктивності.
+Комілюємо програму
+``` 
+-gcc -Wall -Wextra -pthread main.c module1.c module2.c -o threaded_program\
+```
+Після запуску програми qpof створює файл який ми перенаправляємо в формат .txt
+```
+gprof threaded_program gmon.out > analysis.txt
+```
+В цьому текствому файлі отримуємо аналіз продуквтивності
+```
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+ no time accumulated
+
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls  Ts/call  Ts/call  name
+  0.00      0.00     0.00        1     0.00     0.00  print1
+  0.00      0.00     0.00        1     0.00     0.00  print2
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+...
+```
+#### -Оптимізуйте код для роботи з багатоядерними процесорами.
+```
+#include <stdio.h>
+#include <omp.h>
+
+void print1();
+void print2();
+
+int main() {
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        print1();
+
+        #pragma omp section
+        print2();
+
+        #pragma omp section
+        printf("Потік OpenMP: виконання паралельної секції.\n");
+    }
+
+    printf("Головна програма: Усі операції завершено.\n");
+    return 0;
+}
+```
+Для оптимізації програми під багатоядерні процесори використано OpenMP. За допомогою директиви #pragma omp parallel sections функції print1(), print2() та додатковий блок виконуються одночасно у різних потоках.
+
+#### -Використовуйте асинхронний ввід/вивід (aio.h) замість стандартного stdio.h.
+```
+#include <aio.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int main() {
+    int fd = open("output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if(fd < 0) {
+        perror("Помилка відкриття файлу");
+        return 1;
+    }
+
+    const char* msg = "Асинхронний запис!\n";
+
+    struct aiocb cb;
+    memset(&cb, 0, sizeof(cb));
+    cb.aio_fildes = fd;
+    cb.aio_buf =(void*) msg;
+    cb.aio_nbytes = strlen(msg);
+    cb.aio_offset = 0;
+
+    aio_write(&cb);
+
+    for(int i=0; i<5; i++) {
+        printf("Основний потік працює: %d\n", i);
+        usleep(200000);
+    }
+
+
+    printf("Асинхронна запис завершена!\n");
+    close(fd);
+
+    return 0;
+}
+```
+У цій програмі використовується асинхронний ввід/вивід (aio.h) для запису повідомлення у файл output.txt. Асинхронність дозволяє операції запису виконуватись паралельно з основним потоком,одночасно продовжує виконання інших дій — простого лічильника в циклі.aio_write() запускає запис у файл, а основний потік продовжує роботу.
+#### -Реалізуйте версію програми на C++ з використанням std::thread.
+main.cpp
+```
+#include <iostream>
+#include <thread>
+
+void print1();
+void print2();
+
+void thread_function() {
+    std::cout << "Потік: Виконання завдання успішно розпочато." << std::endl;
+}
+
+int main() {
+    std::thread t(thread_function);
+
+    print1();
+    print2();
+
+    t.join();
+
+    std::cout << "Головна програма: Усі операції завершено." << std::endl;
+
+    return 0;
+}
+```
+# Завдання 5
+### Уявіть, що ваша програма на C складається з кількох окремих файлів, і вони використовують заголовкові файли, як показано нижче:
+main.c - stdio.h, process1.h  
+input.c - stdio.h, list.h  
+output.c - stdio.h  
+process1.c - stdio.h, process1.h  
+process2.c - stdio.h, list.h
+
+#### Які файли потрібно перекомпілювати після внесення змін до process1.c?
+Тільки сам файл process1.c
+#### Які файли потрібно перекомпілювати після внесення змін до process1.h?
+Треба перекомпілювати файли main.c,process1.c,бо вони мають в своєму складі файл process.h
+#### Які файли потрібно перекомпілювати після внесення змін до list.h?
+Файли input.c,process2.c\
+### Додайте ще один файл (utility.c) із залежністю від process1.h та stdio.h.
+utility.c:
+```
+#include <stdio.h>
+#include "process1.h"
+
+void utility_function() {
+    printf("Utility function\n"); 
+}
+```
