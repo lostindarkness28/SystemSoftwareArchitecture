@@ -527,3 +527,90 @@ Enter number of seconds: 85444
 Enter number of seconds: -7322
 7322 seconds its 0 days 2 hours 2 minutes 2 seconds ago(in the past).
 ```
+# Завдання 7
+Напишіть програму на ANSI C, яка читає з stdin довільне ціле число — основу системи числення, потім ціле число у цій системі числення, а далі виводить його значення у десятковій системі. Ігноруйте всі недопустимі символи.
+Приклад:
+Вхід:   8 77   
+Вихід:  63 (значення 77 у системі числення з основою 8)
+
+#### main.c
+```
+
+#include <stdio.h>
+
+int main() {
+    int base;
+    int ch;
+    int result = 0;
+    int value;
+
+    printf("Введіть основу: ");
+    if(scanf("%d", &base) != 1) return 0;
+
+    while((ch = getchar()) != EOF && ch != '\n') {
+        value = -1;
+
+        if(ch >= '0' && ch <= '9') {
+             value = ch-'0';
+        }
+
+        if(value >= 0 && value < base){
+            result = result * base + value;
+        }
+    }
+
+    printf("Результат: %d\n", result);
+    return 0;
+}
+```
+Запускаємо програму
+```
+./Ex7
+Введіть основу: 8 77
+Результат: 63
+```
+Додайте обробку значень із плаваючою точкою для десяткової системи числення.
+```
+#include <stdio.h>
+
+int main() {
+    int base;
+    int ch;
+    double result = 0;
+    int value;
+    int is_fraction=0;
+    double weight=1;
+
+    printf("Введіть основу: ");
+    if(scanf("%d", &base) != 1) return 0;
+
+    while((ch = getchar()) != EOF && ch != '\n') {
+        value = -1;
+        if (ch == '.') {
+            is_fraction = 1;
+            continue;
+        }
+        if(ch >= '0' && ch <= '9') {
+             value = ch-'0';
+        }
+        else if (ch >= 'A' && ch <= 'Z') {
+            value = ch - 'A' + 10;
+        } else if (ch >= 'a' && ch <= 'z') {
+            value = ch - 'a' + 10;
+        }
+
+        if(value >= 0 && value < base){
+            if(!is_fraction){
+                 result = result * base + value;
+            }
+            else{
+                weight=weight/base;
+                result = result + (value * weight);
+           }
+        }
+    }
+
+    printf("Результат: %f\n", result);
+    return 0;
+}
+```
