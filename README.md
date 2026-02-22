@@ -690,3 +690,83 @@ matrix[1][2] = 18.087853
 Яке число шукаємо? 7.4
 Знайдено! Індекс: [1] [0] (Значення в масиві: 7.441286)
 ```
+# Завдання 9
+Напишіть функцію replace, яка отримує вказівник на рядок, замінює всі пробіли знаком мінус, і повертає кількість замінених пробілів.
+Приклад:
+Вхід: "The cat sat"
+Вихід: "The-cat-sat", Кількість замін: 2
+main.c
+```
+
+#include <stdio.h>
+int replace(char *str){
+        int count=0;
+        while(*str!='\0'){
+                if(*str==' '){
+                        *str='-';
+                        count++;
+                }
+                str++;
+        }
+        return count;
+}
+int main(){
+        char text[100];
+        int replaced_count;
+        printf("Введіть рядок з пробілами:\n");
+        fgets(text,sizeof(text),stdin);
+        replaced_count=replace(text);
+        printf("%s\n",text);
+        printf("Кількість пробілів:%d\n",replaced_count);
+        return 0;
+}
+```
+Робота програми
+```
+./Ex9
+Введіть рядок з пробілами:
+The cat sat sat
+The-cat-sat-sat
+
+Кількість пробілів:3
+```
+#### Додайте параметр для вказівки символу, на який потрібно виконати заміну.
+Додаємо в функцію replace параметр,який буде отримувати від користувача символ
+```
+
+#include <stdio.h>
+int replace(char *str,char new_sym){
+        int count=0;
+        while(*str!='\0'){
+                if(*str==' '){
+                        *str=new_sym;
+                        count++;
+                }
+                str++;
+        }
+        return count;
+}
+int main(){
+        char text[100];
+        char user_sym;
+        int replaced_count;
+        printf("Введіть рядок з пробілами:\n");
+        fgets(text,sizeof(text),stdin);
+        printf("Введіть символ, на який замінити пробіли: ");
+        scanf("%c", &user_sym);
+        replaced_count=replace(text,user_sym);
+        printf("%s\n",text);
+        printf("Кількість змінених символів:%d\n",replaced_count);
+        return 0;
+}
+```
+Робота
+```
+./Ex9
+Введіть рядок з пробілами:
+The cat sat
+Введіть символ, на який замінити пробіли: *
+The*cat*sat
+
+Кількість змінених символів:2
+```
