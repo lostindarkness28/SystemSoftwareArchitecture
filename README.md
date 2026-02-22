@@ -770,3 +770,66 @@ The*cat*sat
 
 Кількість змінених символів:2
 ```
+# Завдання 10
+Напишіть програму з використанням перелічуваних типів для обчислення та виводу завтрашньої дати відносно заданої. 
+```
+
+#include <stdio.h>
+enum Month{
+                JAN=1,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+};
+struct Date{
+        int day;
+        enum Month month;
+        int year;
+};
+int days_in_month(enum Month m, int year) {
+    switch (m) {
+        case APR: case JUN: case SEP: case NOV:
+            return 30;
+        case FEB:
+            if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+                return 29;
+            else
+                return 28;
+        default:
+            return 31;
+    }
+}
+int main(){
+        struct Date today,tomorrow;
+        printf("Введіть поточну дату (приклад 31 12 2025): ");
+        scanf("%d %u %d",&today.day,(unsigned int*)&today.month,&today.year);
+        if (today.month < JAN || today.month > DEC || today.day < 1 || today.day > days_in_month(today.month, today.year)) {
+                printf("Такої дати не існує!\n");
+                return 1;
+        }
+        tomorrow=today;
+        tomorrow.day++;
+        if(tomorrow.day>days_in_month(today.month,today.year)){
+                tomorrow.day=1;
+                tomorrow.month++;
+                if (tomorrow.month > DEC) {
+                        tomorrow.month = JAN;
+                        tomorrow.year++;
+                }
+        }
+        printf("Завтра буде: %02d.%02d.%d\n", tomorrow.day,(unsigned int)tomorrow.month, tomorrow.year);
+        return 0;
+}
+```
+Запуск
+```
+./Ex10
+Введіть поточну дату (приклад 31 12 2025): 22 02 2026
+Завтра буде: 23.02.2026
+```
+#### Додайте обробку дати в різних календарях, наприклад, григоріанському та юліанському.
+```
+./Ex10
+Оберіть календар (1 - Григоріанський, 2 - Юліанський): 1
+Введіть поточну дату (приклад 31 12 2025): 28 02 1900
+
+За обраним календарем (Григоріанський):
+Завтра буде: 01.03.1900
+```
