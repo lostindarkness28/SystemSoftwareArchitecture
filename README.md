@@ -1,7 +1,98 @@
-# Практична робота №1
+# Практична робота №1(3-варіант)
 
 ## Огляд
 Мета цієї роботи — ознайомитися з процесом налаштування середовища розробки в Ubuntu Linux та опанувати базові навички програмування мовою C, зокрема роботу з математичними бібліотеками та системними викликами.
+
+# Завдання 3
+### Припустимо, у вас є програма на C, що складається з кількох файлів:
+
+-main.c\
+-input.c\
+-output.c\
+-process1 (бібліотека у /usr/lib)\
+-process (бібліотека у ~/mylibs)
+
+### Вам потрібно:
+
+1)Написати команду компіляції з використанням gcc.\
+Створюємо програму з файлом main.c,файлом input.c який буде приймати число від користувача та файл output.c який буде виводити результат,компілюємо: 
+```
+gcc main.c input.c output.c -o Ex2
+```
+При запуску отримаємо
+```
+Input:
+print x=2
+Output: 2
+```
+2)Змінити команду, щоб програма використовувала process1 із /usr/lib.\
+```
+gcc main.c input.o output.o -L/usr/lib -lprocess1 -o my_program
+```
+Прапорець ***-L*** - вказує шлях до папки, де лежать бібліотеки.\
+Прапорець -l - вказує назву конкретної бібліотеки, яку треба підключити.
+
+3)Змінити команду, щоб програма використовувала process із домашнього каталогу.\
+```
+gcc main.c input.o output.o -L/usr/lib -lprocess1 -L$HOME/mylibs -lprocess -o my_program
+```
+***$HOME***-шукати бібліотеку в домашньому каталозі.
+
+4)Додати прапорці для генерації налагоджувальної інформації (-g) і перевірки продуктивності (-O2).\
+```
+gcc main.c input.o output.o -L/usr/lib -lprocess1 -L$HOME/mylibs -lprocess -g -O2 -o my_program
+```
+5)Створити статичну (.a) і динамічну (.so) версії бібліотек process1 і process та перевірити різницю у виконанні.
+
+Створюємо папку
+```
+mkdir -p ~/mylibs
+```
+Копіюємо process у домашню папку
+```
+cp libprocess.a libprocess.so ~/mylibs/
+```
+Копіюємо process1 у системну папку 
+```
+sudo cp libprocess1.a libprocess1.so /usr/lib/
+```
+-gcc -c input.c output.c\
+-gcc main.c input.o output.o -L/usr/lib -lprocess1 -L~/mylibs -lprocess -o my_program\
+
+-Використовуйте Makefile для автоматизації процесу компіляції.\
+-Додайте до Makefile ціль clean, яка видаляє .o файли та виконуваний файл.\
+```
+all:
+	gcc -c input.c output.c
+	gcc main.c input.o output.o -L/usr/lib -lprocess1 -L$(HOME)/mylibs -lprocess -g -O2 -o my_program
+
+clean:
+	rm -f *.o my_program
+```
+-Напишіть CMakeLists.txt для збирання програми за допомогою CMake.
+```
+cmake_minimum_required(VERSION 3.10)
+project(MyProcessProject C)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
+link_directories(/usr/lib $ENV{HOME}/mylibs)
+add_executable(my_program main.c input.c output.c)
+target_link_libraries(my_program process1 process)
+```
+`cmake_minimum_required(VERSION 3.10)`: Встановлює мінімально необхідну версію CMake, яка потрібна для коректного опрацювання цього конфігураційного файлу.
+
+`project(MyProcessProject C)`: Визначає назву вашого проєкту та вказує, що він написаний мовою програмування C.
+
+`set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")`: Додає прапорці компілятора для включення налагоджувальної інформації та активації оптимізації коду другого рівня.
+
+`link_directories(/usr/lib $ENV{HOME}/mylibs)`: Вказує шлях до системних та користувацьких папок, у яких компонувальник шукатиме файли бібліотек.
+
+`add_executable(my_program main.c input.c output.c)`: Оголошує створення виконуваного файлу з назвою my_program на основі перелічених вихідних файлів коду.
+
+`target_link_libraries(my_program process1 process)`: Підключає до вашої програми зовнішні бібліотеки process1 та process для фінального збирання проєкту.
+
+
+
+
 
 ## Завдання №1: Обчислення інтеграла нормального розподілу
 Програма розраховує ймовірність того, що випадкова величина потрапить у заданий довірчий інтервал [-Z; Z], використовуючи функцію помилок `erf`.
