@@ -118,3 +118,51 @@ size hello
    1370     600       8    1978     7ba hello
 
 ```
+# Завдання 3
+#### Скомпілюйте й запустіть тестову програму, щоб визначити приблизне розташування стека у вашій системі:
+```
+#include <stdio.h>
+
+int main() {
+    int i;
+    printf("The stack top is near %p\n", &i);
+    return 0;
+}
+```
+#### Запуск
+```
+The stack top is near 0x7ffd861bc204
+```
+Отримано приблизну адресу стека.
+#### Знайдіть розташування сегментів даних і тексту, а також купи всередині сегмента даних, оголосіть змінні, які будуть поміщені в ці сегменти, і виведіть їхні адреси.
+Для того,щоб  знайти адресу data,створюємо та ініціалізуємо глобальну зміну,для адреси bss створюємо неініціалізовану глобальну зміну,для того щоб знайти адресу сегменту text виводимо адресу функції main,для купи створюємо локальний вказівник на зміну для якої виділеяємо пам'ять за допомогою malloc.
+```
+#include <stdio.h>
+#include <stdlib.h>
+int g_data=62;
+int g_bss;
+int main() {
+        int i=1;
+        printf("The stack top is near %p\n", &i);
+        int *heap=malloc(sizeof(int));
+        printf("Addres of heap is near %p\n", heap);
+        printf("Addres of text is near %p\n", &main);
+        printf("Addres of bss is near %p\n", &g_bss);
+        printf("Addres of data is near %p\n", &g_data);
+        return 0;
+}
+```
+#### Отримано:
+```
+./Ex3
+The stack top is near 0x7ffd1544331c
+Addres of heap is near 0x60a82b2b16b0
+Addres of text is near 0x60a7ef00a189
+Addres of bss is near 0x60a7ef00d018
+Addres of data is near 0x60a7ef00d010
+```
+#### Збільшіть розмір стека, викликавши функцію й оголосивши кілька великих локальних масивів. Яка зараз адреса вершини стека?
+```
+./Ex3.2
+The stack top is near 0x7fffb42968dc
+```
