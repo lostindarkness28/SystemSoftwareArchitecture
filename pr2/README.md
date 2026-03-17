@@ -166,3 +166,60 @@ Addres of data is near 0x60a7ef00d010
 ./Ex3.2
 The stack top is near 0x7fffb42968dc
 ```
+# Завдання 4
+#### Ваше завдання – дослідити стек процесу або пригадати, як це робиться. Ви можете:
+-Автоматично за допомогою утиліти gstack.\
+-Вручну за допомогою налагоджувача GDB.\
+
+Користувачі Ubuntu можуть зіткнутися з проблемою: на момент написання (Ubuntu 18.04) gstack, схоже, не був доступний (альтернативою може бути pstack). Якщо gstack не працює, використовуйте другий метод – через GDB, як показано нижче.
+Спочатку подивіться на стек за допомогою gstack(1). Нижче наведений приклад стека bash (аргументом команди є PID процесу):
+```
+$ gstack 14654  
+#0  0x00007f359ec7ee7a in waitpid () from /lib64/libc.so.6  
+#1  0x000056474b4b41d9 in waitchild.isra ()  
+#2  0x000056474b4b595d in wait_for ()  
+#3  0x000056474b4a5033 in execute_command_internal ()  
+#4  0x000056474b4a5c22 in execute_command ()  
+#5  0x000056474b48f252 in reader_loop ()  
+#6  0x000056474b48dd32 in main ()  
+$
+```
+Розбір стека:\
+-Номер кадру стека відображається ліворуч перед символом #.\
+-Кадр #0 – це найнижчий кадр. Читайте стек знизу вверх (тобто від main() – кадр #6 – до waitpid() – кадр #0).\
+-Якщо процес багатопотоковий, gstack покаже стек кожного потоку окремо.\
+-Аналіз стека в режимі користувача через GDB.
+
+Щоб переглянути стек процесу вручну, використовуйте GDB, приєднавшись до процесу.\
+Нижче наведена невелика тестова програма на C, що виконує кілька вкладених викликів функцій. Граф викликів виглядає так:
+##### main() --> foo() --> bar() --> bar_is_now_closed() --> pause()
+Системний виклик pause() – це приклад блокуючого виклику. Він переводить викликаючий процес у сплячий режим, очікуючи (або блокуючи) сигнал. У цьому випадку процес блокується, поки не отримає будь-який сигнал.\
+За допомогою команди `ps aux | grep a.out` дізнаємось PID
+```
+ps aux | grep ./a.out
+arthas     31121  0.0  0.0   2680  1544 pts/0    S+   18:12   0:00 ./a.out
+arthas     31146  0.0  0.0   6680  2336 pts/1    S+   18:12   0:00 grep --color=auto ./a.out
+```
+Запускаємо gdb:
+```
+[sudo] password for arthas:
+(gdb) attach 31446
+Attaching to process 31446
+Reading symbols from /home/arthas/pr2/Ex4/a.out...
+(No debugging symbols found in /home/arthas/pr2/Ex4/a.out)
+Reading symbols from /lib/x86_64-linux-gnu/libc.so.6...
+Reading symbols from /usr/lib/debug/.build-id/8e/9fd827446c24067541ac5390e6f527fb5947bb.debug...
+Reading symbols from /lib64/ld-linux-x86-64.so.2...
+Reading symbols from /usr/lib/debug/.build-id/da/07864eb4c1b06504b8688d25d7e84759fe708d.debug...
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007ed2964fa3d4 in __libc_pause () at ../sysdeps/unix/sysv/linux/pause.c:29
+warning: 29     ../sysdeps/unix/sysv/linux/pause.c: No such file or directory
+(gdb) Quit
+(gdb) bt
+#0  0x00007ed2964fa3d4 in __libc_pause () at ../sysdeps/unix/sysv/linux/pause.c:29
+#1  0x00006080d3385224 in bar_is_now_closed ()
+#2  0x00006080d3385287 in bar ()
+#3  0x00006080d33852ea in foo ()
+#4  0x00006080d3385354 in main ()
+```
