@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.10)
+project(MyProcessProject C)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
+link_directories(/usr/lib $ENV{HOME}/mylibs)
+add_executable(my_program main.c input.c output.c)
+target_link_libraries(my_program process1 process)
