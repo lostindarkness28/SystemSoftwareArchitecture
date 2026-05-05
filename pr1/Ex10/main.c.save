@@ -1,0 +1,66 @@
+#include <stdio.h>
+enum Month{
+                JAN=1,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+};
+enum CalendarType {
+    GREGORIAN = 1, JULIAN = 2
+};
+struct Date{
+	int day;
+	enum Month month;
+	int year;
+	enum CalendarType type;		
+};
+int days_in_month(enum Month m, int year,enum CalendarType type) {
+	switch (m) {
+  		case APR: case JUN: case SEP: case NOV:
+            		return 30;
+       		case FEB:
+            		if (type == JULIAN) {
+                // В юліанському все просто: кожен 4-й рік високосний
+                return (year % 4 == 0) ? 29 : 28;
+            } else {
+                // Григоріанська логіка
+                if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+                    return 29;
+                else
+                    return 28;
+            }if (type == JULIAN) {
+                // В юліанському все просто: кожен 4-й рік високосний
+                return (year % 4 == 0) ? 29 : 28;
+            } else {
+                // Григоріанська логіка
+                if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+                    return 29;
+                else
+                    return 28;
+            }if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+                		return 29;
+            		else
+                		return 28;
+        		default:
+            	return 31;
+    }
+}
+int main(){
+	struct Date today,tomorrow;
+	printf("Введіть поточну дату (приклад 31 12 2025): ");
+	scanf("%d %u %d",&today.day,(unsigned int*)&today.month,&today.year);
+	if (today.month < JAN || today.month > DEC || today.day < 1 || today.day > days_in_month(today.month, today.year)) {
+       		printf("Такої дати не існує!\n");
+        	return 1;
+    	}
+	tomorrow=today;
+	tomorrow.day++;
+	if(tomorrow.day>days_in_month(today.month,today.year)){
+		tomorrow.day=1;
+		tomorrow.month++;
+		if (tomorrow.month > DEC) {
+         		tomorrow.month = JAN;
+            		tomorrow.year++;
+        	}
+	}
+	printf("Завтра буде: %02d.%02d.%d\n", tomorrow.day,(unsigned int)tomorrow.month, tomorrow.year);
+	return 0;
+}
+

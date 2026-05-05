@@ -1,0 +1,59 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define MAX_LEN 1024
+
+int main(int argc,char *argv[]){
+	int n=2;
+	int i;
+	FILE *input;
+	if(argc>=3 && strcmp(argv[1],"-n")==0){
+		n=atoi(argv[2]);
+		printf("Вводьте текст (Ctrl+D для завершення):\n");
+		input = stdin;
+		char **line;
+
+	}else if (argc > 1) {
+                input = fopen(argv[1], "r");
+	}else{
+		printf("Файл не вказано. Вводьте текст (Ctrl+D для завершення):\n");
+        	input = stdin;
+   	}
+	char *line[n];
+	for(i=0;i<n;i++){
+		line[i]=NULL;
+	}
+	char buffer[MAX_LEN];
+	int count=0;
+	while(fgets(buffer,MAX_LEN,input)){
+		int index=count%n;
+		if(line[index]){
+			free(line[index]);
+		}
+		line[index]=strdup(buffer);
+		count++;
+	}
+	printf("\nОстанні %d рядків\n", n);
+	int start;
+	if(count>n){
+		start=count%n;
+	}else{
+		start=0;
+	}
+	int to_show;
+	if(count<n){
+		to_show=count;
+	}else{
+		to_show=n;
+	}
+	for(i=0;i<to_show;i++){
+		int idx=(start+i)%n;
+		printf("%s",line[idx]);
+		free(line[idx]);
+	}
+	if(input!=stdin){
+		fclose(input);
+	}
+	return 0;
+}
