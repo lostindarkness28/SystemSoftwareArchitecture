@@ -171,3 +171,100 @@ ls -l dice_results.txt
 -rw-r--r-- 1 root root 1024 May  6 13:35 dice_results.txt
 ```
 Спрацювало обмеження в 1024 байти
+## Завдання 4
+Напишіть програму, що імітує лотерею, вибираючи 7 різних цілих чисел у діапазоні від 1 до 49 і ще 6 з 36. Встановіть обмеження на час ЦП (max CPU time) і генеруйте результати вибору чисел (7 із 49, 6 із 36). Обробіть ситуацію, коли ліміт ресурсу вичерпано.
+```
+gcc Ex4.c -o Ex4
+```
+Встановлюємо обмеження 
+```
+ulimit -St 1
+ulimit -Ht 2
+```
+Результат:
+```
+Starting lottery simulation. CPU limit: 1 sec.
+Lottery 7 of 49: 12 45 3 22 19 31 7 
+Lottery 6 of 36: 5 28 14 2 33 11 
+Lottery 7 of 49: 40 1 25 8 16 49 33 
+Lottery 6 of 36: 12 9 36 21 4 18 
+Lottery 7 of 49: 5 13 22 44 2 17 38 
+Lottery 6 of 36: 30 1 15 22 7 19 
+Lottery 7 of 49: 21 4 48 33 10 15 2 
+Lottery 6 of 36: 11 25 3 8 32 14 
+
+[ SIGXCPU received: CPU time limit exceeded!
+```
+## Завдання 5
+Напишіть програму для копіювання одного іменованого файлу в інший. Імена файлів передаються у вигляді аргументів.
+#### Компіляція програми
+```
+gcc Ex5.c -o Ex5_copy
+```
+Перевірка:
+```
+echo "Hello, Docker!" > test.txt
+./Ex5 test.txt test_copy.txt
+```
+Результат:
+```
+root@334e9e1bb64e:/work# gcc copy.c -o Ex5
+root@334e9e1bb64e:/work# echo "Hello world" > test.txt
+root@334e9e1bb64e:/work# ./Ex5 test.txt test_copy.txt
+File copied successfully
+root@334e9e1bb64e:/work# cat test_copy.txt
+Hello world
+```
+обробляти ситуацію перевищення обмеження на розмір файлу^
+```
+dd if=/dev/urandom of=big_file.txt bs=1k count=20
+./Ex5 big_file.txt output.txt
+```
+Результат:
+```
+[!] SIGXFSZ received: File size limit reached during copying!
+```
+## Завдання 6
+Напишіть програму, що демонструє використання обмеження (max stack segment size). Підказка: рекурсивна програма активно використовує стек.
+#### Компіляція
+```
+gcc Ex6.c -o Ex6
+```
+Результат:
+```
+root@334e9e1bb64e:work# ./Ex6
+Starting recursive function. Stack limit: 65536 bytes.
+Current depth: 1
+
+[!] SIGSEGV received: Stack overflow or memory limit reached!
+```
+## Завдання по варіантам(3-варіант):
+Написати програму, яка використовує багато пам'яті та перевірити обмеження (ulimit -v).
+#### Компіляція
+```
+gcc Ex7.c -o Ex7
+```
+Встановлюємо обмеження
+```
+ulimit -v 50000
+```
+Результат
+```
+root@334e9e1bb64e:/work# ./Ex7
+Starting memory allocation loop...
+Check ulimit -v to see the current shell limit.
+Allocated: 10 MB
+Allocated: 20 MB
+Allocated: 30 MB
+
+[!] MALLOC FAILED!
+Total allocated before failure: 30 MB
+```
+## Висновок:
+У ході виконання практичної роботи я поглибив знання про системні ресурси ОС Linux та механізми керування ними за допомогою мови програмування C.\
+##### Було вивчено
+Керування ресурсами: На практиці застосовано функцію setrlimit та утиліту ulimit для встановлення обмежень на розмір файлу, час процесора, об'єм віртуальної пам'яті та розмір стеку.
+
+Обробка сигналів: Реалізовано механізми перехоплення сигналів, що надсилаються ядром при порушенні лімітів.
+
+Робота з пам'яттю: Шляхом створення рекурсивних функцій та циклічного виділення пам'яті через malloc продемонстровано виникнення помилок сегментації та відмову у виділенні ресурсів при досягненні встановлених меж.
